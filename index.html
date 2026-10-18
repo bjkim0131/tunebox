@@ -146,14 +146,15 @@ function youtubeEmbedUrl(raw){
     const u=new URL(raw);
     const host=u.hostname.toLowerCase().replace(/^www\./,'');
     const list=u.searchParams.get('list');
+    const origin='https://bjkim0131.github.io';
     if(list){
-      return 'https://www.youtube-nocookie.com/embed/videoseries?list='+encodeURIComponent(list);
+      return 'https://www.youtube.com/embed/videoseries?list='+encodeURIComponent(list)+'&playsinline=1&origin='+encodeURIComponent(origin);
     }
     let videoId=u.searchParams.get('v');
     if(host==='youtu.be') videoId=u.pathname.split('/').filter(Boolean)[0];
     if(!videoId && u.pathname.startsWith('/embed/')) videoId=u.pathname.split('/')[2];
     if(videoId && /^[A-Za-z0-9_-]{6,20}$/.test(videoId)){
-      return 'https://www.youtube-nocookie.com/embed/'+encodeURIComponent(videoId);
+      return 'https://www.youtube.com/embed/'+encodeURIComponent(videoId)+'?playsinline=1&origin='+encodeURIComponent(origin);
     }
   }catch{}
   return null;

@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#11111a">
+<title>TuneBox — 내 음악</title>
+<style>
+:root{color-scheme:dark;--bg:#0b0b12;--panel:#15151f;--panel2:#222231;--text:#f7f5ff;--muted:#a6a4bb;--purple:#b49aff;--pink:#f0a7ff;--orange:#ff9d54;--line:#2b2a3c}
+*{box-sizing:border-box}
+body{margin:0;background:radial-gradient(ellipse at 15% -10%,#35245b 0,transparent 38%),radial-gradient(ellipse at 100% 25%,#242040 0,transparent 32%),var(--bg);color:var(--text);font:15px/1.5 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;min-height:100vh}
+main{max-width:900px;margin:auto;padding:26px 18px 110px}
+.top{display:flex;align-items:center;gap:12px;margin:2px 0 26px}
+.logo{width:48px;height:48px;border-radius:16px;background:linear-gradient(145deg,#a78bfa,#e0a4ff);display:grid;place-items:center;font-size:25px;color:#211532;box-shadow:0 8px 28px #a78bfa2b}
+.brand{font-size:23px;font-weight:850;letter-spacing:-.7px}.sub{color:var(--muted);font-size:11px;letter-spacing:1.7px}
+.hero{position:relative;overflow:hidden;padding:28px 26px;margin-bottom:20px;border:1px solid #4a3b6a;border-radius:26px;background:linear-gradient(115deg,#30234aee,#1b1b2aee 65%,#242039ee);box-shadow:0 18px 55px #0002}
+.hero:after{content:"♫";position:absolute;right:28px;top:4px;font-size:118px;font-weight:900;color:#d5baff12;transform:rotate(12deg);pointer-events:none}
+.eyebrow{font-size:11px;font-weight:800;letter-spacing:2px;color:#d5c2ff;margin-bottom:10px}
+.hero h1{position:relative;z-index:1;font-size:clamp(30px,5vw,43px);line-height:1.12;margin:0 0 12px;letter-spacing:-1.7px}.hero p{position:relative;z-index:1;max-width:540px;color:#c7c2d9;margin:0}
+.pillrow{display:flex;gap:8px;flex-wrap:wrap;margin-top:20px}.pill{display:inline-flex;align-items:center;gap:7px;border:1px solid #ffffff19;background:#ffffff0b;border-radius:999px;padding:7px 11px;color:#e8e1ff;font-size:12px}
+.sectionhead{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:26px 2px 12px}.sectionhead h2{font-size:18px;margin:0;letter-spacing:-.3px}.sectionhint{color:var(--muted);font-size:12px}
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 18px}.chip{border:1px solid var(--line);background:#171721;border-radius:999px;padding:9px 15px;color:var(--muted);cursor:pointer;transition:background .15s,border-color .15s,color .15s}.chip:hover{border-color:#65548b;color:white}.chip.active{background:#b49aff;color:#211632;border-color:#b49aff;font-weight:800}
+.panel{background:linear-gradient(145deg,#191923f5,#14141df5);border:1px solid var(--line);border-radius:21px;padding:19px;margin:16px 0;box-shadow:0 10px 30px #00000012}.panel h2{font-size:17px;margin:0 0 14px}
+.formgrid{display:grid;grid-template-columns:1fr 1.4fr;gap:10px}.wide{grid-column:1/-1}
+input,select{width:100%;padding:13px 14px;border:1px solid #39384c;background:#0f0f17;border-radius:13px;color:var(--text);font:inherit;min-width:0;outline:none;transition:border-color .15s,box-shadow .15s}
+input:focus,select:focus{border-color:#a78bfa;box-shadow:0 0 0 3px #a78bfa22}input::placeholder{color:#77758d}button{font:inherit;cursor:pointer}
+.primary{width:100%;padding:13px;border-radius:13px;background:linear-gradient(100deg,#b49aff,#e2a9ff);color:#211632;font-weight:850;box-shadow:0 7px 20px #a78bfa20;transition:transform .15s,filter .15s}.primary:hover{filter:brightness(1.06);transform:translateY(-1px)}
+.hint{font-size:12px;color:var(--muted);margin:11px 0 0}
+.searchpanel{padding:13px 15px}.searchrow{display:flex;gap:10px;align-items:center}.searchrow input{flex:1}.count{font-size:12px;color:var(--muted);white-space:nowrap;background:#222231;padding:7px 10px;border-radius:999px}
+.tracklist{display:grid;gap:10px}.track{display:flex;align-items:center;gap:13px;background:linear-gradient(100deg,#191923,#15151e);border:1px solid var(--line);border-radius:18px;padding:13px;transition:transform .16s,border-color .16s,background .16s}.track:hover{transform:translateY(-1px);border-color:#4b4167;background:linear-gradient(100deg,#201c2d,#171721)}
+.cover{width:58px;height:58px;flex:0 0 58px;border-radius:15px;display:grid;place-items:center;font-size:25px;background:linear-gradient(145deg,#4a356d,#28233c);color:#e4d7ff}.cover.sc{background:linear-gradient(145deg,#65391d,#302019);color:#ffb778}
+.trackinfo{min-width:0;flex:1}.tracktitle{font-weight:800;overflow-wrap:anywhere;letter-spacing:-.2px}.trackmeta{font-size:12px;color:var(--muted);margin-top:4px}.trackmeta:before{content:"";display:inline-block;width:6px;height:6px;border-radius:50%;background:#b49aff;margin:0 7px 1px 0}.track:has(.sc) .trackmeta:before{background:var(--orange)}
+.actions{display:flex;gap:7px;flex-wrap:wrap;justify-content:flex-end}.smallbtn{padding:9px 12px;border-radius:11px;background:var(--panel2);color:var(--text);font-size:12px;border:1px solid #ffffff08;transition:filter .15s,transform .15s}.smallbtn:hover{filter:brightness(1.15);transform:translateY(-1px)}.playbtn{background:#d9c9ff;color:#211632;font-weight:850;border-color:transparent}.delete{color:#ffb4c0;background:#2c1d29}
+.empty{text-align:center;padding:38px 14px;color:var(--muted);border:1px dashed #464057;border-radius:18px;background:#15151b88}.empty strong{color:#e9e4f6}
+.notice{font-size:11px;color:#77758d;margin-top:28px;text-align:center}.toast{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);background:#eee7ff;color:#211633;padding:11px 17px;border-radius:999px;font-size:13px;display:none;max-width:90%;z-index:5;box-shadow:0 10px 35px #0005}
+@media(max-width:600px){main{padding:17px 12px 90px}.hero{padding:23px 19px;border-radius:22px}.hero:after{right:6px;top:20px;font-size:88px}.formgrid{grid-template-columns:1fr}.wide{grid-column:auto}.track{align-items:flex-start;gap:10px;padding:11px}.cover{width:49px;height:49px;flex-basis:49px;border-radius:13px}.actions{flex-direction:column;min-width:106px}.smallbtn{padding:8px 9px}.tracktitle{font-size:14px}.sectionhead{margin-top:22px}.panel{padding:15px}}
+@media(max-width:380px){.track{flex-wrap:wrap}.trackinfo{min-width:calc(100% - 70px)}.actions{flex-direction:row;width:100%;margin-left:59px;justify-content:flex-start}}
+</style>
+</head>
+<body>
+<main>
+  <header class="top">
+    <div class="logo">♫</div>
+    <div><div class="brand">TuneBox</div><div class="sub">YOUR PLAYLISTS, ONE PLACE</div></div>
+  </header>
+  <section class="hero">
+    <h1>내 음악을<br>한곳에 모아.</h1>
+    <p>YouTube Music과 SoundCloud의 좋아하는 노래와 플레이리스트를 한곳에 모아 들어요.</p>
+    <div class="pillrow"><span class="pill">▶ YouTube Music</span><span class="pill">☁ SoundCloud</span><span class="pill">♫ 나만의 음악 보관함</span></div>
+  </section>
+  <div class="sectionhead"><h2>내 음악</h2><span class="sectionhint">플리를 눌러 바로 열기</span></div>
+  <div class="chips" role="group" aria-label="음악 서비스 필터">
+    <button class="chip active" data-filter="all">전체</button>
+    <button class="chip" data-filter="youtube">YouTube Music</button>
+    <button class="chip" data-filter="soundcloud">SoundCloud</button>
+  </div>
+  <section class="panel">
+    <h2>＋ 노래 / 플레이리스트 추가하기</h2>
+    <form id="addForm" class="formgrid">
+      <input id="title" class="wide" placeholder="노래 또는 플리 이름 (예: 새벽 감성)" maxlength="120" required>
+      <select id="service" aria-label="음악 서비스">
+        <option value="youtube">YouTube Music</option>
+        <option value="soundcloud">SoundCloud</option>
+      </select>
+      <input id="url" type="url" placeholder="노래 또는 플리 공유 링크 붙여넣기" required>
+      <button class="primary wide" type="submit">내 음악에 저장</button>
+    </form>
+    <p class="hint">각 음악 앱의 공유 메뉴에서 링크를 복사해 붙여넣으세요. 저장 목록은 현재 브라우저에 보관됩니다.</p>
+  </section>
+  <section class="panel searchpanel">
+    <div class="searchrow">
+      <input id="search" type="search" placeholder="노래 / 플리 이름 검색…" aria-label="노래 검색">
+      <span id="count" class="count">0곡</span>
+    </div>
+  </section>
+  <section id="list" class="tracklist" aria-live="polite"></section>
+  <section id="playerArea" class="panel player" hidden>
+    <h2 id="playerTitle">SoundCloud 플레이어</h2>
+    <div id="playerFrame"></div>
+    <p class="hint">재생 가능 여부는 트랙 설정과 서비스 정책에 따라 달라질 수 있어요.</p>
+  </section>
+  <p class="notice">재생 버튼은 각 서비스의 공식 페이지를 엽니다. TuneBox는 YouTube Music 및 SoundCloud의 공식 앱이 아닙니다.</p>
+</main>
+<div id="toast" class="toast" role="status"></div>
+<script>
+const KEY='tunebox-tracks-v1';
+const MY_SC_PLAYLIST='https://soundcloud.com/fhms2e7roqjt/sets/bgdjdkkzv95e?si=145ba293a9254754a4aa970e45f44163&utm_source=clipboard&utm_medium=text&utm_campaign=social_sharing';
+let tracks=[];
+let filter='all';
+const $=id=>document.getElementById(id);
+function load(){
+  try{tracks=JSON.parse(localStorage.getItem(KEY)||'[]');if(!Array.isArray(tracks))tracks=[];}catch{tracks=[];}
+  // 사용자가 보내준 SoundCloud 플레이리스트를 처음 열 때 자동으로 추가해 둡니다.
+  if(!tracks.some(t=>t.url===MY_SC_PLAYLIST || (typeof t.url==='string' && t.url.startsWith('https://soundcloud.com/fhms2e7roqjt/sets/bgdjdkkzv95e')))){
+    tracks.unshift({id:'my-soundcloud-playlist',title:'내 SoundCloud 플리',url:MY_SC_PLAYLIST,service:'soundcloud',kind:'playlist'});
+    try{localStorage.setItem(KEY,JSON.stringify(tracks));}catch{}
+  }
+  render();
+}
+function persist(){localStorage.setItem(KEY,JSON.stringify(tracks));render();}
+function showToast(message){const t=$('toast');t.textContent=message;t.style.display='block';clearTimeout(showToast.timer);showToast.timer=setTimeout(()=>t.style.display='none',2300);}
+function serviceName(s){return s==='soundcloud'?'SoundCloud':'YouTube Music';}
+function isPlaylist(raw,service){
+  try{
+    const u=new URL(raw);
+    if(service==='soundcloud')return u.pathname.split('/').includes('sets');
+    return u.pathname==='/playlist' || u.searchParams.has('list');
+  }catch{return false;}
+}
+function safeUrl(raw,service){
+  try{
+    const u=new URL(raw);
+    if(u.protocol!=='https:')return false;
+    const host=u.hostname.toLowerCase().replace(/^www\./,'');
+    if(service==='youtube')return ['music.youtube.com','youtube.com','youtu.be','m.youtube.com'].includes(host);
+    return ['soundcloud.com','on.soundcloud.com','m.soundcloud.com'].includes(host);
+  }catch{return false;}
+}
+function render(){
+  const q=$('search').value.trim().toLowerCase();
+  const visible=tracks.filter(t=>(filter==='all'||t.service===filter)&&t.title.toLowerCase().includes(q));
+  $('count').textContent=`${visible.length}개`;
+  const list=$('list');list.innerHTML='';
+  if(!visible.length){
+    list.innerHTML=`<div class="empty"><div style="font-size:30px;margin-bottom:8px">♫</div><strong>${tracks.length?'검색 결과가 없어요':'아직 저장한 노래가 없어요'}</strong><div style="font-size:13px;margin-top:6px">${tracks.length?'검색어나 서비스 필터를 바꿔보세요.':'위에서 노래나 플레이리스트 공유 링크를 추가해 보세요.'}</div></div>`;
+    return;
+  }
+  visible.forEach(t=>{
+    const card=document.createElement('article');card.className='track';
+    const kind=t.kind || (isPlaylist(t.url,t.service)?'playlist':'track');
+    const cover=document.createElement('div');cover.className='cover'+(t.service==='soundcloud'?' sc':'');cover.textContent=kind==='playlist'?'▤':(t.service==='soundcloud'?'☁':'♫');
+    const info=document.createElement('div');info.className='trackinfo';
+    const title=document.createElement('div');title.className='tracktitle';title.textContent=t.title;
+    const meta=document.createElement('div');meta.className='trackmeta';meta.textContent=serviceName(t.service)+(kind==='playlist'?' · 플레이리스트':' · 노래');
+    info.append(title,meta);
+    const actions=document.createElement('div');actions.className='actions';
+    const play=document.createElement('button');play.className='smallbtn playbtn';play.textContent=t.service==='soundcloud'?'▶ SoundCloud에서 재생':(kind==='playlist'?'▶ YouTube Music에서 열기':'▶ YouTube Music에서 재생');play.setAttribute('aria-label',t.title+'을(를) '+serviceName(t.service)+'에서 열기');play.onclick=()=>playTrack(t);
+    const del=document.createElement('button');del.className='smallbtn delete';del.textContent='삭제';del.onclick=()=>{if(confirm(`"${t.title}"을(를) 목록에서 삭제할까요?`)){tracks=tracks.filter(x=>x.id!==t.id);persist();}};
+    actions.append(play,del);card.append(cover,info,actions);list.append(card);
+  });
+}
+function playTrack(t){
+  // 각 플랫폼의 공식 페이지에서 재생합니다. 외부 플레이어가 차단될 수 있어 이 방식이 가장 안정적입니다.
+  const opened=window.open(t.url,'_blank','noopener,noreferrer');
+  if(opened){
+    showToast(t.service==='soundcloud'
+      ? 'SoundCloud에서 열었어요. 해당 페이지에서 재생하면 돼요.'
+      : 'YouTube Music에서 열었어요. 해당 페이지에서 재생하면 돼요.');
+  }else{
+    showToast('새 탭이 차단됐어요. 브라우저의 팝업 허용을 확인해 주세요.');
+  }
+}
+$('addForm').addEventListener('submit',e=>{
+  e.preventDefault();
+  const title=$('title').value.trim(),url=$('url').value.trim(),service=$('service').value;
+  if(!title){showToast('노래 제목을 입력해 주세요.');return;}
+  if(!safeUrl(url,service)){showToast(service==='youtube'?'유효한 YouTube Music 또는 YouTube 링크를 넣어 주세요.':'유효한 SoundCloud 링크를 넣어 주세요.');return;}
+  if(tracks.some(t=>t.url===url)){showToast('이미 저장한 링크예요.');return;}
+  tracks.unshift({id:Date.now().toString(36)+Math.random().toString(36).slice(2,7),title,url,service,kind:isPlaylist(url,service)?'playlist':'track'});
+  persist();$('title').value='';$('url').value='';showToast(isPlaylist(url,service)?'플레이리스트를 저장했어요!':'노래를 저장했어요!');
+});
+$('search').addEventListener('input',render);
+document.querySelectorAll('[data-filter]').forEach(btn=>btn.addEventListener('click',()=>{
+  filter=btn.dataset.filter;
+  document.querySelectorAll('[data-filter]').forEach(b=>b.classList.toggle('active',b===btn));
+  render();
+}));
+load();
+</script>
+</body>
+</html>

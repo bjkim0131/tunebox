@@ -75,16 +75,17 @@ input:focus,select:focus{border-color:#a78bfa;box-shadow:0 0 0 3px #a78bfa22}inp
   </section>
   <section id="list" class="tracklist" aria-live="polite"></section>
   <section id="playerArea" class="panel player" hidden>
-    <h2 id="playerTitle">SoundCloud 플레이어</h2>
+    <h2 id="playerTitle">TuneBox 플레이어</h2>
     <div id="playerFrame"></div>
-    <p class="hint">재생 가능 여부는 트랙 설정과 서비스 정책에 따라 달라질 수 있어요.</p>
+    <p class="hint">일부 곡이나 플리는 임베드 재생이 제한될 수 있어요. 재생되지 않으면 아래 버튼으로 원래 서비스에서 열어 주세요.</p><button id="openOriginal" class="smallbtn" type="button">원래 서비스에서 열기 ↗</button>
   </section>
-  <p class="notice">재생 버튼은 각 서비스의 공식 페이지를 엽니다. TuneBox는 YouTube Music 및 SoundCloud의 공식 앱이 아닙니다.</p>
+  <p class="notice">TuneBox는 공식 YouTube Music 또는 SoundCloud 앱이 아닙니다. 재생은 각 서비스의 공식 임베디드 플레이어를 사용하며, 일부 콘텐츠는 재생이 제한될 수 있습니다.</p>
 </main>
 <div id="toast" class="toast" role="status"></div>
 <script>
 const KEY='tunebox-tracks-v1';
 const MY_SC_PLAYLIST='https://soundcloud.com/fhms2e7roqjt/sets/bgdjdkkzv95e?si=145ba293a9254754a4aa970e45f44163&utm_source=clipboard&utm_medium=text&utm_campaign=social_sharing';
+const MY_SC_EMBED_URI='https://api.soundcloud.com/playlists/soundcloud%3Aplaylists%3A1972042896';
 let tracks=[];
 let filter='all';
 const $=id=>document.getElementById(id);
@@ -134,22 +135,70 @@ function render(){
     const meta=document.createElement('div');meta.className='trackmeta';meta.textContent=serviceName(t.service)+(kind==='playlist'?' · 플레이리스트':' · 노래');
     info.append(title,meta);
     const actions=document.createElement('div');actions.className='actions';
-    const play=document.createElement('button');play.className='smallbtn playbtn';play.textContent=t.service==='soundcloud'?'▶ SoundCloud에서 재생':(kind==='playlist'?'▶ YouTube Music에서 열기':'▶ YouTube Music에서 재생');play.setAttribute('aria-label',t.title+'을(를) '+serviceName(t.service)+'에서 열기');play.onclick=()=>playTrack(t);
+    const play=document.createElement('button');play.className='smallbtn playbtn';play.textContent='▶ 앱 안에서 재생';play.setAttribute('aria-label',t.title+'을(를) TuneBox 안에서 재생');play.onclick=()=>playTrack(t);
     const del=document.createElement('button');del.className='smallbtn delete';del.textContent='삭제';del.onclick=()=>{if(confirm(`"${t.title}"을(를) 목록에서 삭제할까요?`)){tracks=tracks.filter(x=>x.id!==t.id);persist();}};
     actions.append(play,del);card.append(cover,info,actions);list.append(card);
   });
 }
-function playTrack(t){
-  // 각 플랫폼의 공식 페이지에서 재생합니다. 외부 플레이어가 차단될 수 있어 이 방식이 가장 안정적입니다.
-  const opened=window.open(t.url,'_blank','noopener,noreferrer');
-  if(opened){
-    showToast(t.service==='soundcloud'
-      ? 'SoundCloud에서 열었어요. 해당 페이지에서 재생하면 돼요.'
-      : 'YouTube Music에서 열었어요. 해당 페이지에서 재생하면 돼요.');
-  }else{
-    showToast('새 탭이 차단됐어요. 브라우저의 팝업 허용을 확인해 주세요.');
-  }
+let currentTrack=null;
+function youtubeEmbedUrl(raw){
+  try{
+    const u=new URL(raw);
+    const host=u.hostname.toLowerCase().replace(/^www\./,'');
+    const list=u.searchParams.get('list');
+    if(list){
+      return 'https://www.youtube-nocookie.com/embed/videoseries?list='+encodeURIComponent(list);
+    }
+    let videoId=u.searchParams.get('v');
+    if(host==='youtu.be') videoId=u.pathname.split('/').filter(Boolean)[0];
+    if(!videoId && u.pathname.startsWith('/embed/')) videoId=u.pathname.split('/')[2];
+    if(videoId && /^[A-Za-z0-9_-]{6,20}$/.test(videoId)){
+      return 'https://www.youtube-nocookie.com/embed/'+encodeURIComponent(videoId);
+    }
+  }catch{}
+  return null;
 }
+function playTrack(t){
+  currentTrack=t;
+  const area=$('playerArea');
+  const frameBox=$('playerFrame');
+  const title=$('playerTitle');
+  frameBox.replaceChildren();
+  title.textContent='▶ '+t.title;
+  let src=null;
+  if(t.service==='soundcloud'){
+    src='https://w.soundcloud.com/player/?url='+encodeURIComponent((t.url && t.url.includes('/sets/bgdjdkkzv95e'))?'https://api.soundcloud.com/playlists/soundcloud%3Aplaylists%3A1972042896':t.url)+'&color=%23b49aff&auto_play=false&hide_related=false&show_comments=true&show_user=true&show_reposts=false&show_teaser=true&visual=true';
+  }else{
+    src=youtubeEmbedUrl(t.url);
+  }
+  if(!src){
+    area.hidden=false;
+    showToast('이 링크는 내장 재생을 지원하지 않아 원래 서비스에서 열어 주세요.');
+    area.scrollIntoView({behavior:'smooth',block:'nearest'});
+    return;
+  }
+  const frame=document.createElement('iframe');
+  frame.title='TuneBox player for '+t.title;
+  frame.src=src;
+  frame.loading='lazy';
+  frame.allow='autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share';
+  frame.allowFullscreen=true;
+  frame.referrerPolicy='strict-origin-when-cross-origin';
+  frame.style.width='100%';
+  frame.style.height=t.service==='soundcloud' && isPlaylist(t.url,t.service)?'450px':'315px';
+  frame.style.border='0';
+  frame.style.borderRadius='14px';
+  frame.style.background='#0f0f17';
+  frameBox.append(frame);
+  area.hidden=false;
+  area.scrollIntoView({behavior:'smooth',block:'nearest'});
+  showToast('TuneBox 안에서 재생할 준비가 됐어요. 일부 콘텐츠는 서비스 설정에 따라 제한될 수 있어요.');
+}
+$('openOriginal').addEventListener('click',()=>{
+  if(!currentTrack)return;
+  const opened=window.open(currentTrack.url,'_blank','noopener,noreferrer');
+  if(!opened)showToast('새 탭이 차단됐어요. 브라우저의 팝업 허용을 확인해 주세요.');
+});
 $('addForm').addEventListener('submit',e=>{
   e.preventDefault();
   const title=$('title').value.trim(),url=$('url').value.trim(),service=$('service').value;
